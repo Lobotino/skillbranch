@@ -184,4 +184,22 @@ class ExampleUnitTest {
         Assert.assertNotEquals(oldAccess, user.accessCode!!)
         Assert.assertEquals(expectedInfo, successResult)
     }
+
+    @Test
+    fun import_from_csv() {
+        val csv = " John Doe ;JohnDoe@unknow.com;[B@7591083d:c6adb4becdc64e92857e1e2a0fd6af84;;"
+        val expectedInfo = """
+            firstName: John
+            lastName: Doe
+            login: johndoe@unknow.com
+            fullName: John Doe
+            initials: J D
+            email: JohnDoe@unknow.com
+            phone: null
+            meta: {src=csv}
+        """.trimIndent()
+
+        val successResult = UserHolder.importUsers(listOf(csv))
+        Assert.assertEquals(expectedInfo, successResult[0].userInfo)
+    }
 }

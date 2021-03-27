@@ -6,7 +6,6 @@ import java.lang.StringBuilder
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.SecureRandom
-import kotlin.random.Random.Default.nextBytes
 
 class User private constructor(
     private val firstName: String,
@@ -27,7 +26,7 @@ class User private constructor(
                 .map { it.first().toUpperCase() }
                 .joinToString(" ")
 
-    private var phone: String? = null
+    var phone: String? = null
         set(value) {
             field = value?.replace("""[^+\d]""".toRegex(), "").also {
                 it?.length?.let {
@@ -64,7 +63,7 @@ class User private constructor(
     constructor(
             firstName: String,
             lastName: String?,
-            rawPhone: String
+            rawPhone: String,
     ) : this(firstName, lastName, rawPhone = rawPhone, meta = mapOf("auth" to "sms")) {
         println("Secondary phone constructor")
         val code = generateAccessCode()
@@ -72,6 +71,19 @@ class User private constructor(
         println("Phone passwordHash is $passwordHash")
         accessCode = code
         sendAccessCodeToUser(rawPhone, code)
+    }
+
+    //for csv
+    constructor(
+            firstName: String,
+            lastName: String?,
+            email: String?,
+            salt: String,
+            passwordHash: String,
+            phone: String?
+    ) : this(firstName, lastName, email = email, rawPhone = phone, meta = mapOf("src" to "csv")) {
+        this.salt = salt
+        this.passwordHash = passwordHash
     }
 
     init {
@@ -146,6 +158,27 @@ class User private constructor(
                 !phone.isNullOrBlank() -> User(firstName, lastName, phone)
                 !email.isNullOrBlank() && !password.isNullOrBlank() -> User(firstName, lastName, email, password)
                 else -> throw IllegalArgumentException("Email or phone must not be null or blank")
+            }
+        }
+
+        fun importUser(rawUser: String) : User {
+            val userInfo = rawUser.split(";")
+            val fullName = userInfo[0]
+            val (firstName, lastName) = fullName.fullNameToPair()
+
+            var email : String? = userInfo[1]
+            val saltAndHash = userInfo[2].split(":")
+            val salt = saltAndHash[0]
+            val passwordHash = saltAndHash[1]
+            var phone : String? = userInfo[3]
+
+            if(phone.isNullOrBlank()) phone = null
+            if(email.isNullOrBlank()) email = null
+
+            if(email.isNullOrBlank() && phone.isNullOrBlank()) {
+                throw IllegalArgumentException("Email and phone is blank")
+            } else {
+                return User(firstName, lastName, email, salt, passwordHash, phone)
             }
         }
 

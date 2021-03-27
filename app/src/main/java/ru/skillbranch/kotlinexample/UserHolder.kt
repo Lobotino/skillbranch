@@ -40,4 +40,21 @@ object UserHolder {
             user -> user.changePassword(user.accessCode!!, user.generateAccessCode())
         }
     }
+
+    fun importUsers(list: List<String>) : List<User> {
+        val result = ArrayList<User>()
+        for (rawUser in list) {
+            User.importUser(rawUser).also { user ->
+                if (map[user.login] != null) {
+                    if (map[user.phone] != null) throw IllegalArgumentException("User is already exist!")
+                    map[user.phone!!] = user
+                } else {
+                    map[user.login] = user
+                }
+
+                result.add(user)
+            }
+        }
+        return result
+    }
 }
