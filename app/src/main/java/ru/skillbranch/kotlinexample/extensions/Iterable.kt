@@ -1,6 +1,6 @@
 package ru.skillbranch.kotlinexample.extensions
 
-object Iterable {
+class Iterable {
 
     fun<T> List<T>.dropLastUntil(predicate: (T) -> Boolean) : List<T>{
         val mutableResult = this.toMutableList()

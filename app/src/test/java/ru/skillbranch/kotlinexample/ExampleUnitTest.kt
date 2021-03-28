@@ -3,7 +3,6 @@ package ru.skillbranch.kotlinexample
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
-import ru.skillbranch.kotlinexample.extensions.Iterable.dropLastUntil
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -204,9 +203,4 @@ class ExampleUnitTest {
         Assert.assertEquals(expectedInfo, successResult[0].userInfo)
     }
 
-    @Test
-    fun dropUntil() {
-        val result = listOf(1,2,3).dropLastUntil { it == 2 }
-        Assert.assertEquals(listOf(1), result)
-    }
 }
